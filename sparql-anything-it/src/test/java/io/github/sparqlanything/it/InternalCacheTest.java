@@ -42,10 +42,9 @@ public class InternalCacheTest {
 
 		// Query with nested SERVICE clauses - should use internal cache automatically
 		String queryStr = "PREFIX fx: <http://sparql.xyz/facade-x/ns/> " +
-				"SELECT ?v1 ?v2 { " +
+				"SELECT ?v1 ?v2 WHERE { " +
 				"  SERVICE <x-sparql-anything:content=test,txt.split=e,audit=true> { " +
 				"    [] fx:anySlot ?v1 . " +
-				"    # Nested query - should hit internal cache " +
 				"    SERVICE <x-sparql-anything:content=test,txt.split=e> { " +
 				"      [] fx:anySlot ?v2 . " +
 				"    } " +
@@ -66,8 +65,8 @@ public class InternalCacheTest {
 		Dataset ds = DatasetFactory.createGeneral();
 		QC.setFactory(ARQ.getContext(), FacadeX.ExecutorFactory);
 
-		String queryStr = "SELECT ?o { SERVICE <x-sparql-anything:content=abc,txt.split=b,audit=true,strategy=0> " +
-				"{GRAPH <http://sparql.xyz/facade-x/data/audit> " +
+		String queryStr = "SELECT ?o WHERE { SERVICE <x-sparql-anything:content=abc,txt.split=b,audit=true,strategy=0> " +
+				"{ GRAPH <http://sparql.xyz/facade-x/data/audit> " +
 				"{ ?s <http://sparql.xyz/facade-x/ns/cachedGraph> ?o} }}";
 		
 		Query query = QueryFactory.create(queryStr);
@@ -98,16 +97,15 @@ public class InternalCacheTest {
 
 		// Query that accesses the same source twice - internal cache should be used
 		String queryStr = "PREFIX fx: <http://sparql.xyz/facade-x/ns/> " +
-				"SELECT ?count { " +
+				"SELECT ?count WHERE { " +
 				"  { " +
-				"    SELECT (COUNT(*) as ?count) { " +
-				"      SERVICE <x-sparql-anything:content=a,b,c,txt.split=comma> { " +
+				"    SELECT (COUNT(*) as ?count) WHERE { " +
+				"      SERVICE <x-sparql-anything:content=a-b-c,txt.split=-> { " +
 				"        ?s ?p ?o . " +
 				"      } " +
 				"    } " +
 				"  } " +
-				"  # Access the same source again " +
-				"  SERVICE <x-sparql-anything:content=a,b,c,txt.split=comma> { " +
+				"  SERVICE <x-sparql-anything:content=a-b-c,txt.split=-> { " +
 				"    [] fx:anySlot \"a\" . " +
 				"  } " +
 				"}";
@@ -125,8 +123,8 @@ public class InternalCacheTest {
 		Dataset ds = DatasetFactory.createGeneral();
 		QC.setFactory(ARQ.getContext(), FacadeX.ExecutorFactory);
 
-		String queryStr = "SELECT ?o { SERVICE <x-sparql-anything:content=xyz,txt.split=y,audit=true,strategy=0,use-cache=true> " +
-				"{GRAPH <http://sparql.xyz/facade-x/data/audit> " +
+		String queryStr = "SELECT ?o WHERE { SERVICE <x-sparql-anything:content=xyz,txt.split=y,audit=true,strategy=0,use-cache=true> " +
+				"{ GRAPH <http://sparql.xyz/facade-x/data/audit> " +
 				"{ ?s <http://sparql.xyz/facade-x/ns/cachedGraph> ?o} }}";
 		
 		Query query = QueryFactory.create(queryStr);
